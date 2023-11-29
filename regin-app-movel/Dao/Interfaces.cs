@@ -14,6 +14,8 @@ namespace regin_app_mobile.Dao
 
         TipoProtocolo.Tipos PesquisaTipoProtocolo(string protocolo, IDbCommand iDbCommand, bool fechaConexaov);
 
+        TipoProtocolo.Tipos PesquisaTipoProtocoloInterno(string protocolo, IDbCommand iDbCommand, bool fechaConexao);
+
         List<Processo> PesquisaProtocoloRegin(string siglaUf, string protocolo, IDbCommand iDbCommand, bool fechaConexao);
 
         List<Processo> PesquisaProtocoloOrgaoRegistro(string siglaUf, string protocolo, IDbCommand iDbCommand, bool fechaConexao);

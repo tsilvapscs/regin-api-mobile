@@ -47,6 +47,11 @@ namespace regin_app_mobile.Negocio
             {
                 tipo = reginDao.PesquisaTipoProtocolo(protocolo, conexaoBancoDadosRegin.CriaComando(), true);
             }
+            if (tipo == TipoProtocolo.Tipos.NAO_ENCONTRADO)
+            {
+                tipo = reginDao.PesquisaTipoProtocoloInterno(protocolo, conexaoBancoDadosRegin.CriaComando(), true);
+            }
+
             int codigoMensagem = (int)ConstantesServicoWeb.CodigosRetorno.SUCESSO;
             if (tipo == TipoProtocolo.Tipos.NAO_ENCONTRADO)
             {
@@ -125,6 +130,7 @@ namespace regin_app_mobile.Negocio
                         {
                             processo.pessoa.nome = requerimento.solicitante;
                         }
+                        ajustarNumeroprotocolo87(tipoProtocolo, processo);
                         processos.Add(processo);
                     }
                     pscs = MontaRetornoProtocoloSucesso(processos);
@@ -178,6 +184,7 @@ namespace regin_app_mobile.Negocio
                         {
                             processo.pessoa.nome = requerimento.solicitante;
                         }
+                        ajustarNumeroprotocolo87(tipoProtocolo, processo);
                         processos.Add(processo);
                     }
                     pscs = MontaRetornoProtocoloSucesso(processos);
@@ -205,6 +212,7 @@ namespace regin_app_mobile.Negocio
                         {
                             processo.pessoa.nome = requerimento.solicitante;
                         }
+                        ajustarNumeroprotocolo87(tipoProtocolo, processo);
                         processos.Add(processo);
                         pscs = MontaRetornoProtocoloSucesso(processos);
                     }
@@ -248,6 +256,7 @@ namespace regin_app_mobile.Negocio
 
                                 processos[p].pessoa.naturezaJuridicaCodigo = processos[p].requerimento.codigoNaturezaJuridica;
                                 processos[p].pessoa.naturezaJuridicaNome = processos[p].requerimento.descricaoNaturezaJuridica;
+                                processos[p] = ajustarNumeroprotocolo87(tipoProtocolo, processos[p]);
                             }
                             pscs = MontaRetornoProtocoloSucesso(processos);
                         }
@@ -321,9 +330,17 @@ namespace regin_app_mobile.Negocio
                             processos[p] = reginDao.PesquisaOrgaoRegistroAnalise(processos[p].uf, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
                             processos[p].instituicoesAnalise[0] = reginDao.PesquisaOrgaoRegistroAndamento(protocolo, processos[p].instituicoesAnalise[0], conexaoBancoDadosRegin.CriaComando(), true);
                             processos[p] = reginDao.PesquisaInstituicoesAnalise(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
+                            if (processos[p].instituicoesAnalise == null || processos[p].instituicoesAnalise.Count == 1 && processos[p].protocoloInternoRegin != null)
+                            {
+                                processos[p] = reginDao.PesquisaInstituicoesAnalise(processos[p].protocoloInternoRegin, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
+                            }
                             for (int i = 1; i < processos[p].instituicoesAnalise.Count; i++)
                             {
                                 processos[p].instituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].instituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
+                                if (processos[p].instituicoesAnalise[i].andamentos == null || processos[p].instituicoesAnalise[i].andamentos.Count == 0 && processos[p].protocoloInternoRegin != null)
+                                {
+                                    processos[p].instituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(processos[p].protocoloInternoRegin, processos[p].instituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
+                                }
                             }
                         }
                         // Ajusta dados da empresa de acordo com os do requerimento.
@@ -355,7 +372,10 @@ namespace regin_app_mobile.Negocio
                         }
 
                     }
-
+                    foreach(Processo processo in processos)
+                    {
+                        ajustarNumeroprotocolo87(tipoProtocolo, processo);
+                    }
                     pscs = MontaRetornoProtocoloSucesso(processos);
                 }
                 else
@@ -365,6 +385,15 @@ namespace regin_app_mobile.Negocio
             }
 
             return pscs;
+        }
+
+        private static Processo ajustarNumeroprotocolo87(TipoProtocolo.Tipos tipoProtocolo, Processo processo)
+        {
+            if (processo.juntaComercialProtocolo != null && processo.juntaComercialProtocolo.Trim().Length > 0 && tipoProtocolo.Equals(TipoProtocolo.Tipos.LEGALIZACAO) && processo.numeroProtocolo.StartsWith("87"))
+            {
+                processo.numeroProtocolo = processo.juntaComercialProtocolo;
+            }
+            return processo;
         }
 
         public ConsultaProcessoResponse PesquisaDadosProtocolo(string protocolo)

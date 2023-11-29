@@ -6,3 +6,11 @@ C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-movel\regin-app-movel\obj\Debu
 C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-movel\regin-app-movel\obj\Debug\regin-app-movel.csproj.CopyComplete
 C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-movel\regin-app-movel\obj\Debug\regin-app-movel.dll
 C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-movel\regin-app-movel\obj\Debug\regin-app-movel.pdb
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Debug\regin-app-movel.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Debug\regin-app-movel.pdb
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Debug\MySql.Data.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Debug\regin-app-movel.csproj.AssemblyReference.cache
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Debug\regin-app-movel.csproj.CoreCompileInputs.cache
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Debug\regin-app-movel.csproj.CopyComplete
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Debug\regin-app-movel.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Debug\regin-app-movel.pdb

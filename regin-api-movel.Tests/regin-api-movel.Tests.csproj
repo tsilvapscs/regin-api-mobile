@@ -113,6 +113,10 @@
       <Project>{3B602D8B-F861-4704-8693-C462ADCD952B}</Project>
       <Name>regin-api-movel</Name>
     </ProjectReference>
+    <ProjectReference Include="..\regin-app-movel\regin-app-movel.csproj">
+      <Project>{C942A210-89D8-4CB6-B01A-50B95DF6B6EF}</Project>
+      <Name>regin-app-movel</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

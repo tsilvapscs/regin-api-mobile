@@ -127,7 +127,56 @@ namespace regin_app_mobile.Dao
                 query.Append("SELECT p.pro_protocolo ");
                 query.Append("     , DECODE(p.pro_tip_operacao, 1, 3, 2, 3, 3, 5, 8, 8, 7, 7, -1) AS pro_tip_operacao ");
                 query.Append("  FROM psc_protocolo p ");
-                query.Append(" WHERE p.pro_protocolo = :protocolo");
+                query.Append(" WHERE p.pro_protocolo = :protocolo ");
+
+                if (!fechaConexao)
+                {
+                    iDbCommand.Parameters.Clear();
+                }
+
+                iDbCommand.CommandType = CommandType.Text;
+                iDbCommand.CommandText = query.ToString();
+
+                IDbDataParameter iDbDataParameter = iDbCommand.CreateParameter();
+                iDbDataParameter.ParameterName = "protocolo";
+                iDbDataParameter.Value = protocolo;
+                iDbCommand.Parameters.Add(iDbDataParameter);
+
+                iDataReader = iDbCommand.ExecuteReader();
+
+                if (iDataReader.Read())
+                {
+                    IDataRecord iDataRecord = (IDataRecord)iDataReader;
+                    return TipoProtocolo.GetTipoPorCodigo(Decimal.ToInt16((decimal)iDataRecord[1]));
+                }
+                else
+                {
+                    return TipoProtocolo.Tipos.NAO_ENCONTRADO;
+                }
+            }
+            finally
+            {
+                if (iDataReader != null)
+                {
+                    iDataReader.Close();
+                }
+                if (fechaConexao && iDbCommand != null)
+                {
+                    iDbCommand.Dispose();
+                }
+            }
+        }
+
+        public TipoProtocolo.Tipos PesquisaTipoProtocoloInterno(string protocolo, IDbCommand iDbCommand, bool fechaConexao)
+        {
+            IDataReader iDataReader = null;
+            StringBuilder query = new StringBuilder();
+            try
+            {
+                query.Append("SELECT p.pro_protocolo ");
+                query.Append("     , DECODE(p.pro_tip_operacao, 1, 3, 2, 3, 3, 5, 8, 8, 7, 7, -1) AS pro_tip_operacao ");
+                query.Append("  FROM psc_protocolo p ");
+                query.Append(" WHERE p.pro_protocolo = :protocolo OR p.pro_protocolo = (select pip.pip_pro_protocolo from psc_ident_protocolo pip where pip.pip_protocolo_junta = :protocolo)");
 
                 if (!fechaConexao)
                 {
@@ -208,7 +257,7 @@ namespace regin_app_mobile.Dao
                 query.Append("      ,COALESCE(to_char(RCP.RCO_TNC_COD_NATUR), REPLACE(p.co_natureza_juridica, '-', '')) AS CODIGO_NATUREZA_JURIDICA "); // 29
                 query.Append("      ,UPPER(pkg_util.GetGenerica(900, COALESCE(to_char(RCP.RCO_TNC_COD_NATUR), REPLACE(p.co_natureza_juridica, '-', '')))) AS DESCRICAO_NATUREZA_JURIDICA "); // 30
                 query.Append("      ,COALESCE(UPPER((SELECT a1.no_ato FROM solicitacao s1 INNER JOIN ATO a1 ON (s1.co_ato = a1.co_ato) WHERE s1.nr_protocolo = PPR.PRO_PROTOCOLO AND s1.sq_solicitacao = 1)), '-') AS PROTOCOLO_ATO "); // 31
-                query.Append("      ,RGE.RGE_RUC AS INSCRICAO_ESTADUAL "); // 32
+                query.Append("      ,RGE.RGE_RUC AS INSCRICAO_ESTADUAL ");
                 query.Append("  FROM PSC_PROTOCOLO PPR ");
                 query.Append("  LEFT JOIN PSC_IDENT_PROTOCOLO PIP ON (PPR.PRO_PROTOCOLO = PIP.PIP_PRO_PROTOCOLO) ");
                 query.Append("  LEFT JOIN TAB_MUNIC TMU ON (PPR.PRO_TMU_TUF_UF = TMU.TMU_TUF_UF AND PPR.PRO_TMU_COD_MUN = TMU.TMU_COD_MUN) ");
@@ -219,7 +268,7 @@ namespace regin_app_mobile.Dao
                 query.Append("  LEFT JOIN pessoa pe ON (pe.sq_pessoa = pp.sq_pessoa AND pe.co_junta_comercial = pp.co_junta_comercial AND pe.co_sequencial = pp.co_sequencial) ");
                 query.Append("  LEFT JOIN pessoa_juridica pj ON (pj.sq_pessoa = pe.sq_pessoa AND pj.co_junta_comercial = pe.co_junta_comercial AND pj.co_sequencial = pe.co_sequencial) ");
                 query.Append("  LEFT JOIN RUC_GENERAL RGE ON (PPR.PRO_PROTOCOLO = RGE.RGE_PRA_PROTOCOLO) ");
-                query.Append(" WHERE PPR.PRO_PROTOCOLO = :protocolo");
+                query.Append(" WHERE (PPR.PRO_PROTOCOLO = :protocolo OR PIP.PIP_PROTOCOLO_JUNTA = :protocolo)");
                 query.Append("   AND PPR.PRO_TIP_OPERACAO <> 4");
 
                 if (!fechaConexao)
@@ -246,6 +295,7 @@ namespace regin_app_mobile.Dao
                     if (!iDataRecord.IsDBNull(0))
                     {
                         processo.numeroProtocolo = iDataRecord.GetString(0);
+                        processo.protocoloInternoRegin = iDataRecord.GetString(0);
                     }
                     if (!iDataRecord.IsDBNull(6))
                     {
@@ -1355,6 +1405,10 @@ namespace regin_app_mobile.Dao
             return TipoProtocolo.Tipos.NAO_ENCONTRADO;
         }
 
+        public TipoProtocolo.Tipos PesquisaTipoProtocoloInterno(string protocolo, IDbCommand iDbCommand, bool fechaConexao)
+        {
+            return TipoProtocolo.Tipos.NAO_ENCONTRADO;
+        }
 
         public List<Processo> PesquisaProtocoloRegin(string siglaUf, string protocolo, IDbCommand iDbCommand, bool fechaConexao)
         {
