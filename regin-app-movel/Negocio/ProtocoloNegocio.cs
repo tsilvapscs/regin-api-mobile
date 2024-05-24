@@ -1,12 +1,14 @@
-﻿using regin_app_mobile.Constante;
-using regin_app_mobile.Dao;
-using regin_app_mobile.Database;
-using regin_app_mobile.GeracaoXml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
+using System.Linq;
+using regin_app_movel.Constante;
+using regin_app_movel.Dao;
+using regin_app_movel.Database;
+using regin_app_movel.GeracaoXml;
 
-namespace regin_app_mobile.Negocio
+namespace regin_app_movel.Negocio
 {
     public class ProtocoloNegocio : IDisposable
     {
@@ -47,6 +49,7 @@ namespace regin_app_mobile.Negocio
             {
                 tipo = reginDao.PesquisaTipoProtocolo(protocolo, conexaoBancoDadosRegin.CriaComando(), true);
             }
+
             if (tipo == TipoProtocolo.Tipos.NAO_ENCONTRADO)
             {
                 tipo = reginDao.PesquisaTipoProtocoloInterno(protocolo, conexaoBancoDadosRegin.CriaComando(), true);
@@ -57,10 +60,12 @@ namespace regin_app_mobile.Negocio
             {
                 codigoMensagem = (int)ConstantesServicoWeb.CodigosRetorno.NAO_ENCONTRADO;
             }
-            return new ConsultaTipoProtocoloResponse() {
-                tipoProtocolo = tipo,
-                nomeTipoProtocolo = TipoProtocolo.GetNome(tipo),
-                codigoMensagem = codigoMensagem
+
+            return new ConsultaTipoProtocoloResponse()
+            {
+                TipoProtocolo = tipo,
+                NomeTipoProtocolo = TipoProtocolo.GetNome(tipo),
+                CodigoMensagem = codigoMensagem
             };
         }
 
@@ -70,10 +75,11 @@ namespace regin_app_mobile.Negocio
             Requerimento requerimento = null;
             TipoProtocolo.Tipos tipoProtocolo = TipoProtocolo.Tipos.NAO_ENCONTRADO;
             ConsultaTipoProtocoloResponse consultaTipoProtocoloResponse = PesquisaTipoProtocolo(protocolo);
-            if (consultaTipoProtocoloResponse.codigoMensagem == ((int)ConstantesServicoWeb.CodigosRetorno.SUCESSO))
+            if (consultaTipoProtocoloResponse.CodigoMensagem == ((int)ConstantesServicoWeb.CodigosRetorno.SUCESSO))
             {
-                tipoProtocolo = consultaTipoProtocoloResponse.tipoProtocolo;
+                tipoProtocolo = consultaTipoProtocoloResponse.TipoProtocolo;
             }
+
             string siglaUf = ConfigurationManager.AppSettings[ConfiguracaoSistema.GetParametroChave(ConfiguracaoSistema.Parametros.SIGLA_UF)];
 
             List<Processo> processos;
@@ -81,32 +87,34 @@ namespace regin_app_mobile.Negocio
             {
                 requerimento = requerimentoDao.ConsultaProtocolo(protocolo, conexaoBancoDadosRequerimento.CriaComando(), true);
                 Processo processo;
-                if (requerimento != null && requerimento.numeroProtocolo != null && requerimento.numeroProtocoloOrgaoEstadual != null && requerimento.numeroProtocoloOrgaoEstadual.Trim().Length > 0)
+                if (requerimento != null && requerimento.NumeroProtocolo != null && requerimento.NumeroProtocoloOrgaoEstadual != null && requerimento.NumeroProtocoloOrgaoEstadual.Trim().Length > 0)
                 {
-                    processos = reginDao.PesquisaProtocoloRegin(siglaUf, requerimento.numeroProtocoloOrgaoEstadual, conexaoBancoDadosRegin.CriaComando(), true);
+                    processos = reginDao.PesquisaProtocoloRegin(siglaUf, requerimento.NumeroProtocoloOrgaoEstadual, conexaoBancoDadosRegin.CriaComando(), true);
                     if (processos != null && processos.Count > 0)
                     {
                         for (int p = 0; p < processos.Count; p++)
                         {
-                            requerimento.cargaOrgaoRegistro = "SIM";
-                            processos[p].requerimento = requerimento;
-                            processos[p].fonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
-                            if (processos[p].processosRelacionados == null)
+                            requerimento.CargaOrgaoRegistro = "SIM";
+                            processos[p].Requerimento = requerimento;
+                            processos[p].FonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
+                            if (processos[p].ProcessosRelacionados == null)
                             {
-                                processos[p].processosRelacionados = new List<ProcessoRelacionado>();
+                                processos[p].ProcessosRelacionados = new List<ProcessoRelacionado>();
                             }
-                            processos[p].processosRelacionados.Add(new ProcessoRelacionado(TipoProtocolo.GetNome(TipoProtocolo.Tipos.REQUERIMENTO), requerimento.uf, requerimento.numeroProtocolo));
+
+                            processos[p].ProcessosRelacionados.Add(new ProcessoRelacionado(TipoProtocolo.GetNome(TipoProtocolo.Tipos.REQUERIMENTO), requerimento.Uf, requerimento.NumeroProtocolo));
                             processos[p] = reginDao.PesquisaEventos(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            if (processos[p].processoExigencia.Equals("1") && processos[p].processoSequenciaExigencia != null)
+                            if (processos[p].ProcessoExigencia.Equals("1") && processos[p].ProcessoSequenciaExigencia != null)
                             {
                                 processos[p] = reginDao.PesquisaExigenciasProcesso(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
                             }
-                            processos[p] = reginDao.PesquisaOrgaoRegistroAnalise(processos[p].uf, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            processos[p].instituicoesAnalise[0] = reginDao.PesquisaOrgaoRegistroAndamento(protocolo, processos[p].instituicoesAnalise[0], conexaoBancoDadosRegin.CriaComando(), true);
+
+                            processos[p] = reginDao.PesquisaOrgaoRegistroAnalise(processos[p].Uf, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
+                            processos[p].InstituicoesAnalise[0] = reginDao.PesquisaOrgaoRegistroAndamento(protocolo, processos[p].InstituicoesAnalise[0], conexaoBancoDadosRegin.CriaComando(), true);
                             processos[p] = reginDao.PesquisaInstituicoesAnalise(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            for (int i = 0; i < processos[p].instituicoesAnalise.Count; i++)
+                            for (int i = 0; i < processos[p].InstituicoesAnalise.Count; i++)
                             {
-                                processos[p].instituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].instituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
+                                processos[p].InstituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].InstituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
                             }
                         }
                     }
@@ -114,53 +122,57 @@ namespace regin_app_mobile.Negocio
                     {
                         processos = new List<Processo>();
                         processo = new Processo();
-                        requerimento.cargaOrgaoRegistro = "NÃO";
-                        processo.requerimento = requerimento;
-                        processo.fonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
-                        processo.numeroProtocolo = requerimento.numeroProtocolo;
-                        processo.pessoa = new Pessoa
+                        requerimento.CargaOrgaoRegistro = "NÃO";
+                        processo.Requerimento = requerimento;
+                        processo.FonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
+                        processo.NumeroProtocolo = requerimento.NumeroProtocolo;
+                        processo.Pessoa = new Pessoa
                         {
-                            cpfCnpj = requerimento.cnpj
+                            CpfCnpj = requerimento.Cnpj
                         };
-                        if (requerimento.razaoSocial != null && requerimento.razaoSocial.Trim().Length > 0)
+                        if (requerimento.RazaoSocial != null && requerimento.RazaoSocial.Trim().Length > 0)
                         {
-                            processo.pessoa.nome = requerimento.razaoSocial;
+                            processo.Pessoa.Nome = requerimento.RazaoSocial;
                         }
                         else
                         {
-                            processo.pessoa.nome = requerimento.solicitante;
+                            processo.Pessoa.Nome = requerimento.Solicitante;
                         }
+
                         ajustarNumeroprotocolo87(tipoProtocolo, processo);
                         processos.Add(processo);
                     }
+
                     pscs = MontaRetornoProtocoloSucesso(processos);
                 }
-                else if (requerimento != null && requerimento.numeroProtocolo != null && requerimento.numeroProtocoloViabilidade != null && requerimento.numeroProtocoloViabilidade.Trim().Length > 0)
+                else if (requerimento != null && requerimento.NumeroProtocolo != null && requerimento.NumeroProtocoloViabilidade != null && requerimento.NumeroProtocoloViabilidade.Trim().Length > 0)
                 {
-                    processos = reginDao.PesquisaProtocoloRegin(siglaUf, requerimento.numeroProtocoloViabilidade, conexaoBancoDadosRegin.CriaComando(), true);
+                    processos = reginDao.PesquisaProtocoloRegin(siglaUf, requerimento.NumeroProtocoloViabilidade, conexaoBancoDadosRegin.CriaComando(), true);
                     if (processos != null && processos.Count > 0)
                     {
                         for (int p = 0; p < processos.Count; p++)
                         {
-                            requerimento.cargaOrgaoRegistro = "SIM";
-                            processos[p].requerimento = requerimento;
-                            processos[p].fonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
-                            if (processos[p].processosRelacionados == null)
+                            requerimento.CargaOrgaoRegistro = "SIM";
+                            processos[p].Requerimento = requerimento;
+                            processos[p].FonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
+                            if (processos[p].ProcessosRelacionados == null)
                             {
-                                processos[p].processosRelacionados = new List<ProcessoRelacionado>();
+                                processos[p].ProcessosRelacionados = new List<ProcessoRelacionado>();
                             }
-                            processos[p].processosRelacionados.Add(new ProcessoRelacionado(TipoProtocolo.GetNome(TipoProtocolo.Tipos.REQUERIMENTO), requerimento.uf, requerimento.numeroProtocolo));
+
+                            processos[p].ProcessosRelacionados.Add(new ProcessoRelacionado(TipoProtocolo.GetNome(TipoProtocolo.Tipos.REQUERIMENTO), requerimento.Uf, requerimento.NumeroProtocolo));
                             processos[p] = reginDao.PesquisaEventos(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            if (processos[p].processoExigencia.Equals("1") && processos[p].processoSequenciaExigencia != null)
+                            if (processos[p].ProcessoExigencia.Equals("1") && processos[p].ProcessoSequenciaExigencia != null)
                             {
                                 processos[p] = reginDao.PesquisaExigenciasProcesso(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
                             }
-                            processos[p] = reginDao.PesquisaOrgaoRegistroAnalise(processos[p].uf, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            processos[p].instituicoesAnalise[0] = reginDao.PesquisaOrgaoRegistroAndamento(protocolo, processos[p].instituicoesAnalise[0], conexaoBancoDadosRegin.CriaComando(), true);
+
+                            processos[p] = reginDao.PesquisaOrgaoRegistroAnalise(processos[p].Uf, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
+                            processos[p].InstituicoesAnalise[0] = reginDao.PesquisaOrgaoRegistroAndamento(protocolo, processos[p].InstituicoesAnalise[0], conexaoBancoDadosRegin.CriaComando(), true);
                             processos[p] = reginDao.PesquisaInstituicoesAnalise(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            for (int i = 0; i < processos[p].instituicoesAnalise.Count; i++)
+                            for (int i = 0; i < processos[p].InstituicoesAnalise.Count; i++)
                             {
-                                processos[p].instituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].instituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
+                                processos[p].InstituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].InstituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
                             }
                         }
                     }
@@ -168,50 +180,53 @@ namespace regin_app_mobile.Negocio
                     {
                         processos = new List<Processo>();
                         processo = new Processo();
-                        requerimento.cargaOrgaoRegistro = "NÃO";
-                        processo.requerimento = requerimento;
-                        processo.fonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
-                        processo.numeroProtocolo = requerimento.numeroProtocolo;
-                        processo.pessoa = new Pessoa
+                        requerimento.CargaOrgaoRegistro = "NÃO";
+                        processo.Requerimento = requerimento;
+                        processo.FonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
+                        processo.NumeroProtocolo = requerimento.NumeroProtocolo;
+                        processo.Pessoa = new Pessoa
                         {
-                            cpfCnpj = requerimento.cnpj
+                            CpfCnpj = requerimento.Cnpj
                         };
-                        if (requerimento.razaoSocial != null && requerimento.razaoSocial.Trim().Length > 0)
+                        if (requerimento.RazaoSocial != null && requerimento.RazaoSocial.Trim().Length > 0)
                         {
-                            processo.pessoa.nome = requerimento.razaoSocial;
+                            processo.Pessoa.Nome = requerimento.RazaoSocial;
                         }
                         else
                         {
-                            processo.pessoa.nome = requerimento.solicitante;
+                            processo.Pessoa.Nome = requerimento.Solicitante;
                         }
+
                         ajustarNumeroprotocolo87(tipoProtocolo, processo);
                         processos.Add(processo);
                     }
+
                     pscs = MontaRetornoProtocoloSucesso(processos);
                 }
-                else if (requerimento != null && requerimento.numeroProtocolo != null)
+                else if (requerimento != null && requerimento.NumeroProtocolo != null)
                 {
-                    processos = reginDao.PesquisaProtocoloRegin(siglaUf, requerimento.numeroProtocolo, conexaoBancoDadosRegin.CriaComando(), true);
+                    processos = reginDao.PesquisaProtocoloRegin(siglaUf, requerimento.NumeroProtocolo, conexaoBancoDadosRegin.CriaComando(), true);
 
                     if (processos == null)
                     {
                         processos = new List<Processo>();
                         processo = new Processo();
-                        requerimento.cargaOrgaoRegistro = "NÃO";
-                        processo.fonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
-                        processo.requerimento = requerimento;
-                        processo.pessoa = new Pessoa
+                        requerimento.CargaOrgaoRegistro = "NÃO";
+                        processo.FonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
+                        processo.Requerimento = requerimento;
+                        processo.Pessoa = new Pessoa
                         {
-                            cpfCnpj = requerimento.cnpj
+                            CpfCnpj = requerimento.Cnpj
                         };
-                        if (requerimento.razaoSocial != null && requerimento.razaoSocial.Trim().Length > 0)
+                        if (requerimento.RazaoSocial != null && requerimento.RazaoSocial.Trim().Length > 0)
                         {
-                            processo.pessoa.nome = requerimento.razaoSocial;
+                            processo.Pessoa.Nome = requerimento.RazaoSocial;
                         }
                         else
                         {
-                            processo.pessoa.nome = requerimento.solicitante;
+                            processo.Pessoa.Nome = requerimento.Solicitante;
                         }
+
                         ajustarNumeroprotocolo87(tipoProtocolo, processo);
                         processos.Add(processo);
                         pscs = MontaRetornoProtocoloSucesso(processos);
@@ -222,42 +237,45 @@ namespace regin_app_mobile.Negocio
                         {
                             for (int p = 0; p < processos.Count; p++)
                             {
-                                requerimento.cargaOrgaoRegistro = "SIM";
+                                requerimento.CargaOrgaoRegistro = "SIM";
 
-                                processos[p].requerimento = requerimento;
-                                processos[p].fonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
-                                if (processos[p].processosRelacionados == null)
+                                processos[p].Requerimento = requerimento;
+                                processos[p].FonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
+                                if (processos[p].ProcessosRelacionados == null)
                                 {
-                                    processos[p].processosRelacionados = new List<ProcessoRelacionado>();
+                                    processos[p].ProcessosRelacionados = new List<ProcessoRelacionado>();
                                 }
-                                processos[p].processosRelacionados.Add(new ProcessoRelacionado(TipoProtocolo.GetNome(TipoProtocolo.Tipos.REQUERIMENTO), requerimento.uf, requerimento.numeroProtocolo));
+
+                                processos[p].ProcessosRelacionados.Add(new ProcessoRelacionado(TipoProtocolo.GetNome(TipoProtocolo.Tipos.REQUERIMENTO), requerimento.Uf, requerimento.NumeroProtocolo));
                                 processos[p] = reginDao.PesquisaEventos(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                                if (processos[p].processoExigencia.Equals("1") && processos[p].processoSequenciaExigencia != null)
+                                if (processos[p].ProcessoExigencia.Equals("1") && processos[p].ProcessoSequenciaExigencia != null)
                                 {
                                     processos[p] = reginDao.PesquisaExigenciasProcesso(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
                                 }
+
                                 // processos[p] = reginDao.pesquisaOrgaoRegistroAnalise(processos[p].uf, processos[p], conexaoBancoDadosRegin.criaComando(), true);
                                 // processos[p].instituicoesAnalise[0] = reginDao.pesquisaOrgaoRegistroAndamento(protocolo, processos[p].instituicoesAnalise[0], conexaoBancoDadosRegin.criaComando(), true);
                                 processos[p] = reginDao.PesquisaInstituicoesAnalise(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                                for (int i = 0; i < processos[p].instituicoesAnalise.Count; i++)
+                                for (int i = 0; i < processos[p].InstituicoesAnalise.Count; i++)
                                 {
-                                    processos[p].instituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].instituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
+                                    processos[p].InstituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].InstituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
                                 }
 
-                                if (processos[p].eventos != null && processos[p].eventos.Count > 0)
+                                if (processos[p].Eventos != null && processos[p].Eventos.Count > 0)
                                 {
-                                    processos[p].tipoOperacao = processos[p].eventos[0].descricao;
-                                    processos[p].ato = processos[p].eventos[0].codigo + " - " + processos[p].eventos[0].descricao;
+                                    processos[p].TipoOperacao = processos[p].Eventos[0].Descricao;
+                                    processos[p].Ato = processos[p].Eventos[0].Codigo + " - " + processos[p].Eventos[0].Descricao;
                                 }
 
                                 // Ajustes de dados nao encontrados
-                                processos[p].tipo = TipoProtocolo.GetNome(TipoProtocolo.Tipos.REQUERIMENTO);
+                                processos[p].Tipo = TipoProtocolo.GetNome(TipoProtocolo.Tipos.REQUERIMENTO);
 
 
-                                processos[p].pessoa.naturezaJuridicaCodigo = processos[p].requerimento.codigoNaturezaJuridica;
-                                processos[p].pessoa.naturezaJuridicaNome = processos[p].requerimento.descricaoNaturezaJuridica;
+                                processos[p].Pessoa.NaturezaJuridicaCodigo = processos[p].Requerimento.CodigoNaturezaJuridica;
+                                processos[p].Pessoa.NaturezaJuridicaNome = processos[p].Requerimento.DescricaoNaturezaJuridica;
                                 processos[p] = ajustarNumeroprotocolo87(tipoProtocolo, processos[p]);
                             }
+
                             pscs = MontaRetornoProtocoloSucesso(processos);
                         }
                     }
@@ -282,100 +300,110 @@ namespace regin_app_mobile.Negocio
                 {
                     for (int p = 0; p < processos.Count; p++)
                     {
-                        if (processos[p].requerimento != null && processos[p].requerimento.numeroProtocolo != null && processos[p].requerimento.numeroProtocolo.Trim().Length > 0)
+                        if (processos[p].Requerimento != null && processos[p].Requerimento.NumeroProtocolo != null && processos[p].Requerimento.NumeroProtocolo.Trim().Length > 0)
                         {
-                            requerimento = requerimentoDao.ConsultaProtocolo(processos[p].requerimento.numeroProtocolo, conexaoBancoDadosRequerimento.CriaComando(), true);
+                            requerimento = requerimentoDao.ConsultaProtocolo(processos[p].Requerimento.NumeroProtocolo, conexaoBancoDadosRequerimento.CriaComando(), true);
                             if (requerimento != null)
                             {
-                                processos[p].requerimento = requerimento;
-                                processos[p].requerimento.cargaOrgaoRegistro = "SIM";
+                                processos[p].Requerimento = requerimento;
+                                processos[p].Requerimento.CargaOrgaoRegistro = "SIM";
                             }
                             else
                             {
-                                processos[p].requerimento.situacao = "PROTOCOLO NÃO ENCONTRADO";
+                                processos[p].Requerimento.Situacao = "PROTOCOLO NÃO ENCONTRADO";
                             }
                         }
+
                         if (TipoProtocolo.Tipos.NAO_ENCONTRADO == tipoProtocolo)
                         {
                             processos[p] = reginDao.PesquisaEventosOrgaoRegistro(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            processos[p].fonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
+                            processos[p].FonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.REGIN);
                         }
                         else
                         {
                             processos[p] = reginDao.PesquisaEventos(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            processos[p].fonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.ORGAO_REGISTRO);
+                            processos[p].FonteDados = FontesInformacao.GetNome(FontesInformacao.TipoFonteInformacao.ORGAO_REGISTRO);
                         }
 
 
                         if (TipoProtocolo.Tipos.VIABILIDADE.Equals(tipoProtocolo))
                         {
-                            processos[p].tipoOperacao = "CONSULTA PRÉVIA";
-                            processos[p].ato = "CONSULTA PRÉVIA";
+                            processos[p].TipoOperacao = "CONSULTA PRÉVIA";
+                            processos[p].Ato = "CONSULTA PRÉVIA";
                             processos[p] = reginDao.PesquisaInstituicoesAnalise(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            for (int i = 0; i < processos[p].instituicoesAnalise.Count; i++)
+                            for (int i = 0; i < processos[p].InstituicoesAnalise.Count; i++)
                             {
-                                processos[p].instituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].instituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
+                                processos[p].InstituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].InstituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
                             }
                         }
                         else
                         {
-                            if (processos[p].processoExigencia != null && processos[p].processoExigencia.Equals("1") && processos[p].processoSequenciaExigencia != null)
+                            if (processos[p].ProcessoExigencia != null && processos[p].ProcessoExigencia.Equals("1") && processos[p].ProcessoSequenciaExigencia != null)
                             {
                                 processos[p] = reginDao.PesquisaExigenciasProcesso(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
                             }
-                            if (processos[p].codigoStatus != null && processos[p].codigoStatus.Equals(1))
+
+                            if (processos[p].CodigoStatus != null && processos[p].CodigoStatus.Equals(1))
                             {
-                                processos[p].status = "Finalizado no Orgão de Registro - Enviando para REDESIM";
+                                processos[p].Status = "Finalizado no Orgão de Registro - Enviando para REDESIM";
                             }
-                            processos[p] = reginDao.PesquisaOrgaoRegistroAnalise(processos[p].uf, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            processos[p].instituicoesAnalise[0] = reginDao.PesquisaOrgaoRegistroAndamento(protocolo, processos[p].instituicoesAnalise[0], conexaoBancoDadosRegin.CriaComando(), true);
+
+                            processos[p] = reginDao.PesquisaOrgaoRegistroAnalise(processos[p].Uf, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
+                            processos[p].InstituicoesAnalise[0] = reginDao.PesquisaOrgaoRegistroAndamento(protocolo, processos[p].InstituicoesAnalise[0], conexaoBancoDadosRegin.CriaComando(), true);
                             processos[p] = reginDao.PesquisaInstituicoesAnalise(protocolo, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
-                            if (processos[p].instituicoesAnalise == null || processos[p].instituicoesAnalise.Count == 1 && processos[p].protocoloInternoRegin != null)
+                            if (processos[p].InstituicoesAnalise == null || processos[p].InstituicoesAnalise.Count == 1 && processos[p].ProtocoloInternoRegin != null)
                             {
-                                processos[p] = reginDao.PesquisaInstituicoesAnalise(processos[p].protocoloInternoRegin, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
+                                processos[p] = reginDao.PesquisaInstituicoesAnalise(processos[p].ProtocoloInternoRegin, processos[p], conexaoBancoDadosRegin.CriaComando(), true);
                             }
-                            for (int i = 1; i < processos[p].instituicoesAnalise.Count; i++)
+
+                            for (int i = 1; i < processos[p].InstituicoesAnalise.Count; i++)
                             {
-                                processos[p].instituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].instituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
-                                if (processos[p].instituicoesAnalise[i].andamentos == null || processos[p].instituicoesAnalise[i].andamentos.Count == 0 && processos[p].protocoloInternoRegin != null)
+                                processos[p].InstituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(protocolo, processos[p].InstituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
+                                if (processos[p].InstituicoesAnalise[i].Andamentos == null || processos[p].InstituicoesAnalise[i].Andamentos.Count == 0 && processos[p].ProtocoloInternoRegin != null)
                                 {
-                                    processos[p].instituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(processos[p].protocoloInternoRegin, processos[p].instituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
-                                }
-                            }
-                        }
-                        // Ajusta dados da empresa de acordo com os do requerimento.
-                        if (processos[p].pessoa != null)
-                        {
-                            if (requerimento != null)
-                            {
-                                if (processos[p].pessoa.nome == null || processos[p].pessoa.nome.Trim().Length <= 0)
-                                {
-                                    processos[p].pessoa.nome = requerimento.razaoSocial;
-                                }
-                                if (processos[p].pessoa.cpfCnpj == null || processos[p].pessoa.cpfCnpj.Trim().Length <= 0)
-                                {
-                                    processos[p].pessoa.cpfCnpj = requerimento.cnpj;
-                                }
-                                if (processos[p].pessoa.naturezaJuridicaCodigo == null || processos[p].pessoa.naturezaJuridicaCodigo.Trim().Length <= 0)
-                                {
-                                    processos[p].pessoa.naturezaJuridicaCodigo = requerimento.codigoNaturezaJuridica;
-                                }
-                                if (processos[p].pessoa.naturezaJuridicaNome == null || processos[p].pessoa.naturezaJuridicaNome.Trim().Length <= 0)
-                                {
-                                    processos[p].pessoa.naturezaJuridicaNome = requerimento.descricaoNaturezaJuridica;
-                                }
-                                if (processos[p].pessoa.uf == null || processos[p].pessoa.uf.Trim().Length <= 0)
-                                {
-                                    processos[p].pessoa.uf = requerimento.uf;
+                                    processos[p].InstituicoesAnalise[i] = reginDao.PesquisaInstituicoesAndamento(processos[p].ProtocoloInternoRegin, processos[p].InstituicoesAnalise[i], conexaoBancoDadosRegin.CriaComando(), true);
                                 }
                             }
                         }
 
+                        // Ajusta dados da empresa de acordo com os do requerimento.
+                        if (processos[p].Pessoa != null)
+                        {
+                            if (requerimento != null)
+                            {
+                                if (processos[p].Pessoa.Nome == null || processos[p].Pessoa.Nome.Trim().Length <= 0)
+                                {
+                                    processos[p].Pessoa.Nome = requerimento.RazaoSocial;
+                                }
+
+                                if (processos[p].Pessoa.CpfCnpj == null || processos[p].Pessoa.CpfCnpj.Trim().Length <= 0)
+                                {
+                                    processos[p].Pessoa.CpfCnpj = requerimento.Cnpj;
+                                }
+
+                                if (processos[p].Pessoa.NaturezaJuridicaCodigo == null || processos[p].Pessoa.NaturezaJuridicaCodigo.Trim().Length <= 0)
+                                {
+                                    processos[p].Pessoa.NaturezaJuridicaCodigo = requerimento.CodigoNaturezaJuridica;
+                                }
+
+                                if (processos[p].Pessoa.NaturezaJuridicaNome == null || processos[p].Pessoa.NaturezaJuridicaNome.Trim().Length <= 0)
+                                {
+                                    processos[p].Pessoa.NaturezaJuridicaNome = requerimento.DescricaoNaturezaJuridica;
+                                }
+
+                                if (processos[p].Pessoa.Uf == null || processos[p].Pessoa.Uf.Trim().Length <= 0)
+                                {
+                                    processos[p].Pessoa.Uf = requerimento.Uf;
+                                }
+                            }
+                        }
                     }
-                    foreach(Processo processo in processos)
+
+                    foreach (Processo processo in processos)
                     {
                         ajustarNumeroprotocolo87(tipoProtocolo, processo);
                     }
+
                     pscs = MontaRetornoProtocoloSucesso(processos);
                 }
                 else
@@ -387,12 +415,413 @@ namespace regin_app_mobile.Negocio
             return pscs;
         }
 
+        public List<ResumoProcesso> ConsultarResumoProcessosPorCpf(string cpf, string protocolo, string data)
+        {
+            string urlApiStatusProcess = ConfigurationManager.AppSettings["WsControleRequerimento"].ToString();
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Iniciando consulta de processos.");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Consultas serão filtradas por:");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] CPF => {cpf}");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Protocolo => {protocolo}");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Data => {data}");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Serviço consulta status => {urlApiStatusProcess}");
+            List<ResumoProcesso> resultado = new List<ResumoProcesso>();
+
+            WsControleRequerimento.WsControleRequerimento req = new WsControleRequerimento.WsControleRequerimento
+            {
+                Url = urlApiStatusProcess
+            };
+
+            // Requerimento
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (Requerimento) ConsultarProcessosVinculoPrincipal");
+            requerimentoDao.ConsultarProcessosVinculoPrincipal(cpf, protocolo, data, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processos => processos.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (Requerimento) ConsultarProcessosVinculoPrincipal");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (Requerimento) ConsultarProcessosVinculoPrincipal. Qtd. Registros: {resultado.Count}");
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (Requerimento) ConsultarProcessosRepresentante");
+            requerimentoDao.ConsultarProcessosRepresentante(cpf, protocolo, data, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (Requerimento) ConsultarProcessosRepresentante");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (Requerimento) ConsultarProcessosRepresentante. Qtd. Registros: {resultado.Count}");
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (Requerimento) ConsultarProcessosRepresentanteDoRepresentante");
+            requerimentoDao.ConsultarProcessosRepresentanteDoRepresentante(cpf, protocolo, data, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (Requerimento) ConsultarProcessosRepresentanteDoRepresentante");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (Requerimento) ConsultarProcessosRepresentanteDoRepresentante. Qtd. Registros: {resultado.Count}");
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (Requerimento) ConsultarProcessosContador");
+            requerimentoDao.ConsultarProcessosContador(cpf, protocolo, data, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (Requerimento) ConsultarProcessosContador");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (Requerimento) ConsultarProcessosContador. Qtd. Registros: {resultado.Count}");
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (Requerimento) ConsultarProcessosAssinantes");
+            requerimentoDao.ConsultarProcessosAssinantes(cpf, protocolo, data, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (Requerimento) ConsultarProcessosAssinantes");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (Requerimento) ConsultarProcessosAssinantes. Qtd. Registros: {resultado.Count}");
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (Requerimento) ConsultarProcessosRequerimentoServico");
+            requerimentoDao.ConsultarProcessosRequerimentoServico(cpf, protocolo, data, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (Requerimento) ConsultarProcessosRequerimentoServico");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (Requerimento) ConsultarProcessosRequerimentoServico. Qtd. Registros: {resultado.Count}");
+
+            // REGIN
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (REGIN) ConsultarViabilidadePorSolicitante");
+            reginDao.ConsultarViabilidadePorSolicitante(cpf, protocolo, data, conexaoBancoDadosRegin.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (REGIN) ConsultarViabilidadePorSolicitante");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (REGIN) ConsultarViabilidadePorSolicitante. Qtd. Registros: {resultado.Count}");
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (REGIN) ConsultarViabilidadePorSocios");
+            reginDao.ConsultarViabilidadePorSocios(cpf, protocolo, data, conexaoBancoDadosRegin.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (REGIN) ConsultarViabilidadePorSocios");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (REGIN) ConsultarViabilidadePorSocios. Qtd. Registros: {resultado.Count}");
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (REGIN) ConsultarProtocoloPorSocios");
+            reginDao.ConsultarProtocoloPorSocios(cpf, protocolo, data, conexaoBancoDadosRegin.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (REGIN) ConsultarProtocoloPorSocios");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (REGIN) ConsultarProtocoloPorSocios. Qtd. Registros: {resultado.Count}");
+
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Inicio - (REGIN) ConsultarProtocoloPorRepresentantes");
+            reginDao.ConsultarProtocoloPorRepresentantes(cpf, protocolo, data, conexaoBancoDadosRegin.CriaComando(), true)
+                .Where(processo => filtrarProcessos(processo))
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo => resultado.Add(processo));
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Termino - (REGIN) ConsultarProtocoloPorRepresentantes");
+            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] (REGIN) ConsultarProtocoloPorRepresentantes. Qtd. Registros: {resultado.Count}");
+
+            return resultado.Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .Select(processo =>
+                {
+                    System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Consultando detalhe do status do processo {processo.NumeroProtocolo}");
+                    DataSet ds = req.GetStatusProcesso(processo.NumeroProtocolo);
+                    DataTable dtProtocolo = ds.Tables[0];
+                    if (dtProtocolo.Rows.Count > 0)
+                    {
+                        processo.StatusDetalhe = dtProtocolo.Rows[0]["Descricao"].ToString();
+                        System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Para o processo {processo.NumeroProtocolo} foi encontrado o detalhe {processo.StatusDetalhe}");
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(processo.NumeroProtocoloOrgaoRegistro))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Consultando detalhe do status do processo {processo.NumeroProtocoloOrgaoRegistro}");
+                            DataSet dsOr = req.GetStatusProcesso(processo.NumeroProtocoloOrgaoRegistro);
+                            DataTable dtProtocoloOR = dsOr.Tables[0];
+                            if (dtProtocoloOR.Rows.Count > 0)
+                            {
+                                processo.StatusDetalhe = dtProtocoloOR.Rows[0]["Descricao"].ToString();
+                                System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Para o processo {processo.NumeroProtocoloOrgaoRegistro} foi encontrado o detalhe {processo.StatusDetalhe}");
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[{DateTime.Now}] Para o processo {processo.NumeroProtocoloOrgaoRegistro} não foi encontrado detalhe do status");
+                            }
+                        }
+                    }
+                    return processo;
+                })
+                .ToList();
+        }
+        public List<StatusProcesso> ConsultarProcessosPorCpf(string cpf, string processo_or, string dataSituacao)
+        {
+
+            List<StatusProcesso> resultado = new List<StatusProcesso>();
+            if (ConfigurationManager.AppSettings["WsControleRequerimento"] != null)
+            {
+                WsControleRequerimento.WsControleRequerimento req = new WsControleRequerimento.WsControleRequerimento();
+                req.Url = ConfigurationManager.AppSettings["WsControleRequerimento"].ToString();
+
+                try
+                {
+
+
+                    // Requerimento
+                    requerimentoDao.ConsultarProcessosVinculoPrincipal(cpf, processo_or, dataSituacao, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processos => processos.First())
+                .ToList()
+                .ForEach(processo =>
+                {
+                    StatusProcesso sp = new StatusProcesso();
+                    sp.NumeroProtocolo = processo.NumeroProtocolo;
+                    sp.RazaoSocial = processo.PessoaNome;
+                    sp.Cnpj = processo.PessoaCnpj;
+                    sp.DataCriacao = processo.DataCriacao;
+                    sp.DataAlteracao = processo.DataAlteracao;
+                    sp.Ato = processo.AtoEventoRfbDescricao;
+                    //Verifica se tem Requerimento
+                    DataSet ds = req.GetStatusProcesso(sp.NumeroProtocolo);
+                    DataTable dtProtocoloOR = ds.Tables[0];
+                    if (dtProtocoloOR.Rows.Count > 0)
+                    {
+                        sp.StatusDescricao = dtProtocoloOR.Rows[0]["Descricao"].ToString();
+                    }
+                    else
+                    {
+                        sp.StatusDescricao = processo.StatusDescricao;
+                    }
+                    resultado.Add(sp);
+                });
+
+                    requerimentoDao.ConsultarProcessosRepresentante(cpf, processo_or, dataSituacao, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo =>
+                {
+                    StatusProcesso sp = new StatusProcesso();
+                    sp.NumeroProtocolo = processo.NumeroProtocolo;
+                    sp.RazaoSocial = processo.PessoaNome;
+                    sp.Cnpj = processo.PessoaCnpj;
+                    sp.DataCriacao = processo.DataCriacao;
+                    sp.DataAlteracao = processo.DataAlteracao;
+                    sp.Ato = processo.AtoEventoRfbDescricao;
+                    //Verifica se tem Requerimento
+                    DataSet ds = req.GetStatusProcesso(sp.NumeroProtocolo);
+                    DataTable dtProtocoloOR = ds.Tables[0];
+                    if (dtProtocoloOR.Rows.Count > 0)
+                    {
+                        sp.StatusDescricao = dtProtocoloOR.Rows[0]["Descricao"].ToString();
+                    }
+                    else
+                    {
+                        sp.StatusDescricao = processo.StatusDescricao;
+                    }
+                    resultado.Add(sp);
+                });
+
+                    requerimentoDao.ConsultarProcessosRepresentanteDoRepresentante(cpf, processo_or, dataSituacao, conexaoBancoDadosRequerimento.CriaComando(), true)
+                        .Distinct()
+                        .OrderByDescending(processo => processo.DataAlteracao)
+                        .GroupBy(processo => processo.NumeroProtocolo)
+                        .Select(processo => processo.First())
+                        .ToList()
+                        .ForEach(processo =>
+                        {
+                            StatusProcesso sp = new StatusProcesso();
+                            sp.NumeroProtocolo = processo.NumeroProtocolo;
+                            sp.RazaoSocial = processo.PessoaNome;
+                            sp.Cnpj = processo.PessoaCnpj;
+                            sp.DataCriacao = processo.DataCriacao;
+                            sp.DataAlteracao = processo.DataAlteracao;
+                            sp.Ato = processo.AtoEventoRfbDescricao;
+                            //Verifica se tem Requerimento
+                            DataSet ds = req.GetStatusProcesso(sp.NumeroProtocolo);
+                            DataTable dtProtocoloOR = ds.Tables[0];
+                            if (dtProtocoloOR.Rows.Count > 0)
+                            {
+                                sp.StatusDescricao = dtProtocoloOR.Rows[0]["Descricao"].ToString();
+                            }
+                            else
+                            {
+                                sp.StatusDescricao = processo.StatusDescricao;
+                            }
+                            resultado.Add(sp);
+                        });
+
+                    requerimentoDao.ConsultarProcessosContador(cpf, processo_or, dataSituacao, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo =>
+                {
+                    StatusProcesso sp = new StatusProcesso();
+                    sp.NumeroProtocolo = processo.NumeroProtocolo;
+                    sp.RazaoSocial = processo.PessoaNome;
+                    sp.Cnpj = processo.PessoaCnpj;
+                    sp.DataCriacao = processo.DataCriacao;
+                    sp.DataAlteracao = processo.DataAlteracao;
+                    sp.Ato = processo.AtoEventoRfbDescricao;
+                    //Verifica se tem Requerimento
+                    DataSet ds = req.GetStatusProcesso(sp.NumeroProtocolo);
+                    DataTable dtProtocoloOR = ds.Tables[0];
+                    if (dtProtocoloOR.Rows.Count > 0)
+                    {
+                        sp.StatusDescricao = dtProtocoloOR.Rows[0]["Descricao"].ToString();
+                    }
+                    else
+                    {
+                        sp.StatusDescricao = processo.StatusDescricao;
+                    }
+                    resultado.Add(sp);
+                });
+
+                    requerimentoDao.ConsultarProcessosAssinantes(cpf, processo_or, dataSituacao, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo =>
+                {
+                    StatusProcesso sp = new StatusProcesso();
+                    sp.NumeroProtocolo = processo.NumeroProtocolo;
+                    sp.RazaoSocial = processo.PessoaNome;
+                    sp.Cnpj = processo.PessoaCnpj;
+                    sp.DataCriacao = processo.DataCriacao;
+                    sp.DataAlteracao = processo.DataAlteracao;
+                    sp.Ato = processo.AtoEventoRfbDescricao;
+                    //Verifica se tem Requerimento
+                    DataSet ds = req.GetStatusProcesso(sp.NumeroProtocolo);
+                    DataTable dtProtocoloOR = ds.Tables[0];
+                    if (dtProtocoloOR.Rows.Count > 0)
+                    {
+                        sp.StatusDescricao = dtProtocoloOR.Rows[0]["Descricao"].ToString();
+                    }
+                    else
+                    {
+                        sp.StatusDescricao = processo.StatusDescricao;
+                    }
+                    resultado.Add(sp);
+                });
+
+                    requerimentoDao.ConsultarProcessosRequerimentoServico(cpf, processo_or, dataSituacao, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+                .ForEach(processo =>
+                {
+                    StatusProcesso sp = new StatusProcesso();
+                    sp.NumeroProtocolo = processo.NumeroProtocolo;
+                    sp.RazaoSocial = processo.PessoaNome;
+                    sp.Cnpj = processo.PessoaCnpj;
+                    sp.DataCriacao = processo.DataCriacao;
+                    sp.DataAlteracao = processo.DataAlteracao;
+                    sp.Ato = processo.AtoEventoRfbDescricao;
+                    //Verifica se tem Requerimento
+                    DataSet ds = req.GetStatusProcesso(sp.NumeroProtocolo);
+                    DataTable dtProtocoloOR = ds.Tables[0];
+                    if (dtProtocoloOR.Rows.Count > 0)
+                    {
+                        sp.StatusDescricao = dtProtocoloOR.Rows[0]["Descricao"].ToString();
+                    }
+                    else
+                    {
+                        sp.StatusDescricao = processo.StatusDescricao;
+                    }
+                    resultado.Add(sp);
+                });
+
+                    requerimentoDao.ConsultarProcessosRequerimentoServicoPF(cpf, processo_or, dataSituacao, conexaoBancoDadosRequerimento.CriaComando(), true)
+                .Distinct()
+                .OrderByDescending(processo => processo.DataAlteracao)
+                .GroupBy(processo => processo.NumeroProtocolo)
+                .Select(processo => processo.First())
+                .ToList()
+               .ForEach(processo =>
+               {
+                   StatusProcesso sp = new StatusProcesso();
+                   sp.NumeroProtocolo = processo.NumeroProtocolo;
+                   sp.RazaoSocial = processo.PessoaNome;
+                   sp.Cnpj = processo.PessoaCnpj;
+                   sp.DataCriacao = processo.DataCriacao;
+                   sp.DataAlteracao = processo.DataAlteracao;
+                   sp.Ato = processo.AtoEventoRfbDescricao;
+                   //Verifica se tem Requerimento
+                   DataSet ds = req.GetStatusProcesso(sp.NumeroProtocolo);
+                   DataTable dtProtocoloOR = ds.Tables[0];
+                   if (dtProtocoloOR.Rows.Count > 0)
+                   {
+                       sp.StatusDescricao = dtProtocoloOR.Rows[0]["Descricao"].ToString();
+                   }
+                   else
+                   {
+                       sp.StatusDescricao = processo.StatusDescricao;
+                   }
+                   resultado.Add(sp);
+               });
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+            return resultado;
+        }
         private static Processo ajustarNumeroprotocolo87(TipoProtocolo.Tipos tipoProtocolo, Processo processo)
         {
-            if (processo.juntaComercialProtocolo != null && processo.juntaComercialProtocolo.Trim().Length > 0 && tipoProtocolo.Equals(TipoProtocolo.Tipos.LEGALIZACAO) && processo.numeroProtocolo.StartsWith("87"))
+            if (processo.JuntaComercialProtocolo != null && processo.JuntaComercialProtocolo.Trim().Length > 0 && tipoProtocolo.Equals(TipoProtocolo.Tipos.LEGALIZACAO) && processo.NumeroProtocolo.StartsWith("87"))
             {
-                processo.numeroProtocolo = processo.juntaComercialProtocolo;
+                processo.NumeroProtocolo = processo.JuntaComercialProtocolo;
             }
+
             return processo;
         }
 
@@ -412,9 +841,9 @@ namespace regin_app_mobile.Negocio
         {
             ConsultaProcessoResponse pscs = new ConsultaProcessoResponse
             {
-                codigoMensagem = (int)ConstantesServicoWeb.CodigosRetorno.NAO_ENCONTRADO,
-                mensagem = "Protocolo não encontrado",
-                detalheMensagem = "Ao realizar a pesquisa não foi encontrado o protocolo " + protocolo + "."
+                CodigoMensagem = (int)ConstantesServicoWeb.CodigosRetorno.NAO_ENCONTRADO,
+                Mensagem = "Protocolo não encontrado",
+                DetalheMensagem = "Ao realizar a pesquisa não foi encontrado o protocolo " + protocolo + "."
             };
             return pscs;
         }
@@ -423,8 +852,8 @@ namespace regin_app_mobile.Negocio
         {
             ConsultaProcessoResponse pscs = new ConsultaProcessoResponse
             {
-                codigoMensagem = (int)ConstantesServicoWeb.CodigosRetorno.SUCESSO,
-                processos = processos
+                CodigoMensagem = (int)ConstantesServicoWeb.CodigosRetorno.SUCESSO,
+                Processos = processos
             };
             return pscs;
         }
@@ -445,6 +874,7 @@ namespace regin_app_mobile.Negocio
                     // Free other state (managed objects).
                     FechaConexoesBancoDados();
                 }
+
                 // Free your own state (unmanaged objects).
                 // Set large fields to null.
                 disposed = true;
@@ -463,6 +893,7 @@ namespace regin_app_mobile.Negocio
             {
                 conexaoBancoDadosRegin.AbreConexao();
             }
+
             if (conexaoBancoDadosRequerimento != null)
             {
                 conexaoBancoDadosRequerimento.AbreConexao();
@@ -475,11 +906,21 @@ namespace regin_app_mobile.Negocio
             {
                 conexaoBancoDadosRegin.FecharConexao();
             }
+
             if (conexaoBancoDadosRequerimento != null)
             {
                 conexaoBancoDadosRequerimento.FecharConexao();
             }
         }
 
+        private bool filtrarProcessos(ResumoProcesso processo)
+        {
+            if (processo == null)
+            {
+                return false;
+            }
+            //return !string.IsNullOrEmpty(processo.NumeroProtocolo) || (!string.IsNullOrEmpty(processo.PessoaCnpj) && !string.IsNullOrEmpty(processo.PessoaCpf)) || !string.IsNullOrEmpty(processo.StatusCodigo) || !string.IsNullOrEmpty(processo.StatusDescricao);
+            return true;
+        }
     }
 }

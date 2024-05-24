@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using regin_api_movel.Controllers;
-using regin_app_mobile.GeracaoXml;
+using regin_app_movel.GeracaoXml;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,8 +20,8 @@ namespace regin_api_movel.Tests.Controllers
 
             // Declarar
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.processos.Count());
-            Assert.AreEqual(1, result.codigoMensagem);
+            Assert.AreEqual(0, result.Processos.Count());
+            Assert.AreEqual(1, result.CodigoMensagem);
         }
 
     }

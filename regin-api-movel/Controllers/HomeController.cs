@@ -1,5 +1,5 @@
 ﻿using System.Web.Mvc;
-using regin_app_mobile.Constante;
+using regin_app_movel.Constante;
 
 namespace regin_api_movel.Controllers
 {

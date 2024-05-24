@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Configuration;
 
-namespace regin_app_mobile.Constante
+namespace regin_app_movel.Constante
 {
 
     /// <summary>

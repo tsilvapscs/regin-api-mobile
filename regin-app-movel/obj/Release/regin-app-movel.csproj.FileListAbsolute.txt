@@ -14,3 +14,15 @@ C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Rel
 C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Release\regin-app-movel.csproj.CopyComplete
 C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Release\regin-app-movel.dll
 C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Release\regin-app-movel.pdb
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\regin-app-movel.dll.config
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\regin-app-movel.XmlSerializers.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\FromHeaderAttribute.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\Newtonsoft.Json.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\System.Net.Http.Formatting.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\System.Web.Http.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\System.Web.Http.WebHost.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\Newtonsoft.Json.xml
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\System.Net.Http.Formatting.xml
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\System.Web.Http.xml
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\bin\Release\System.Web.Http.WebHost.xml
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-app-movel\obj\Release\regin-app-movel.XmlSerializers.dll

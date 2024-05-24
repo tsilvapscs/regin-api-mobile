@@ -148,3 +148,11 @@ C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\obj\Rel
 C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\obj\Release\regin-api-movel.csproj.CopyComplete
 C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\obj\Release\regin-api-movel.dll
 C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\obj\Release\regin-api-movel.pdb
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\bin\Swashbuckle.Core.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\bin\WebActivatorEx.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\bin\regin-app-movel.dll.config
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\bin\regin-app-movel.XmlSerializers.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\bin\DocumentFormat.OpenXml.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\bin\DocumentFormat.OpenXml.Framework.dll
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\bin\DocumentFormat.OpenXml.xml
+C:\Users\vtham\PSCS\SourcesProgramasGit\regin-api-mobile\regin-api-movel\bin\DocumentFormat.OpenXml.Framework.xml

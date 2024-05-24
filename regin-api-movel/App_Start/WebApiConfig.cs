@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using Newtonsoft.Json.Converters;
+using System.Linq;
 using System.Web.Http;
 
 namespace regin_api_movel
@@ -13,12 +14,17 @@ namespace regin_api_movel
             config.MapHttpAttributeRoutes();
 
             config.Formatters.XmlFormatter.SupportedMediaTypes.Remove(config.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml"));
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new StringEnumConverter());
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{protocolo}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            SwaggerConfig.Register();
+
+          
         }
     }
 }

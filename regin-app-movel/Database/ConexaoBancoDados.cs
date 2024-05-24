@@ -1,10 +1,10 @@
 ﻿using MySql.Data.MySqlClient;
-using regin_app_mobile.Constante;
 using System.Configuration;
 using System.Data;
 using System.Data.OracleClient;
+using regin_app_movel.Constante;
 
-namespace regin_app_mobile.Database
+namespace regin_app_movel.Database
 {
     /// <summary>
     /// Fabrica de instancias necessarias para conexao a um banco de dados.

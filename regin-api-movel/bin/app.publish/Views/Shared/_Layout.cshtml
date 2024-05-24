@@ -20,7 +20,7 @@
                 </button>
                 @Html.ActionLink("REGIN - API Móvel", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             </div>
-            @if (ViewBag.debug)
+            @if (ViewBag.debug != null && ViewBag.debug)
             {
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">

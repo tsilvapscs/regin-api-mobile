@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="GetXmlRequerimento">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="protocolo" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetXmlRequerimentoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetXmlRequerimentoResult">
+              <s:complexType mixed="true">
+                <s:sequence>
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetXmlProtocolo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="protocolo" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetXmlProtocoloResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetXmlProtocoloResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetStatusProcesso">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="protocolo" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetStatusProcessoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetStatusProcessoResult">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EncontraAtoEvento">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="cnpjOrgao" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="protocoloReq" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EncontraAtoEventoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EncontraAtoEventoResult">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetXmlRequerimentoSoapIn">
+    <wsdl:part name="parameters" element="tns:GetXmlRequerimento" />
+  </wsdl:message>
+  <wsdl:message name="GetXmlRequerimentoSoapOut">
+    <wsdl:part name="parameters" element="tns:GetXmlRequerimentoResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetXmlProtocoloSoapIn">
+    <wsdl:part name="parameters" element="tns:GetXmlProtocolo" />
+  </wsdl:message>
+  <wsdl:message name="GetXmlProtocoloSoapOut">
+    <wsdl:part name="parameters" element="tns:GetXmlProtocoloResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetStatusProcessoSoapIn">
+    <wsdl:part name="parameters" element="tns:GetStatusProcesso" />
+  </wsdl:message>
+  <wsdl:message name="GetStatusProcessoSoapOut">
+    <wsdl:part name="parameters" element="tns:GetStatusProcessoResponse" />
+  </wsdl:message>
+  <wsdl:message name="EncontraAtoEventoSoapIn">
+    <wsdl:part name="parameters" element="tns:EncontraAtoEvento" />
+  </wsdl:message>
+  <wsdl:message name="EncontraAtoEventoSoapOut">
+    <wsdl:part name="parameters" element="tns:EncontraAtoEventoResponse" />
+  </wsdl:message>
+  <wsdl:portType name="WsControleRequerimentoSoap">
+    <wsdl:operation name="GetXmlRequerimento">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Passa os parametos Nome, Identidade, UF, ou CPF retorna um XML com os dados da Pessoa</wsdl:documentation>
+      <wsdl:input message="tns:GetXmlRequerimentoSoapIn" />
+      <wsdl:output message="tns:GetXmlRequerimentoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetXmlProtocolo">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Passa os parametos protocolo OR retorna um XML com os dados do processo</wsdl:documentation>
+      <wsdl:input message="tns:GetXmlProtocoloSoapIn" />
+      <wsdl:output message="tns:GetXmlProtocoloSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetStatusProcesso">
+      <wsdl:input message="tns:GetStatusProcessoSoapIn" />
+      <wsdl:output message="tns:GetStatusProcessoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EncontraAtoEvento">
+      <wsdl:input message="tns:EncontraAtoEventoSoapIn" />
+      <wsdl:output message="tns:EncontraAtoEventoSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WsControleRequerimentoSoap" type="tns:WsControleRequerimentoSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetXmlRequerimento">
+      <soap:operation soapAction="http://tempuri.org/GetXmlRequerimento" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetXmlProtocolo">
+      <soap:operation soapAction="http://tempuri.org/GetXmlProtocolo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetStatusProcesso">
+      <soap:operation soapAction="http://tempuri.org/GetStatusProcesso" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EncontraAtoEvento">
+      <soap:operation soapAction="http://tempuri.org/EncontraAtoEvento" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WsControleRequerimentoSoap12" type="tns:WsControleRequerimentoSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetXmlRequerimento">
+      <soap12:operation soapAction="http://tempuri.org/GetXmlRequerimento" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetXmlProtocolo">
+      <soap12:operation soapAction="http://tempuri.org/GetXmlProtocolo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetStatusProcesso">
+      <soap12:operation soapAction="http://tempuri.org/GetStatusProcesso" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EncontraAtoEvento">
+      <soap12:operation soapAction="http://tempuri.org/EncontraAtoEvento" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WsControleRequerimento">
+    <wsdl:port name="WsControleRequerimentoSoap" binding="tns:WsControleRequerimentoSoap">
+      <soap:address location="https://regin.juceb.ba.gov.br/Requerimentov2/WsControleRequerimento.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WsControleRequerimentoSoap12" binding="tns:WsControleRequerimentoSoap12">
+      <soap12:address location="https://regin.juceb.ba.gov.br/Requerimentov2/WsControleRequerimento.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
